@@ -99,6 +99,7 @@ for currentStage in range(opt.nStage):                      # Multi-stage Lasso
     lists.sort(key=lambda x : x[1])
     maskList.append(lists[:opt.t])
 y=base_hyperband(maskList, 40000,opt.N)               # Run a base algorithm for fine tuning
+#y=base_random_search(maskList,100,N)                  # Run random search as the base algorithm
 bestAnswer=min(y, bestAnswer)
 printSeparator()
 print('best answer : ', bestAnswer)

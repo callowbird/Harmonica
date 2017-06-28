@@ -22,7 +22,7 @@ You may comment/uncomment the two examples in samplings.py, and run python main.
 
 ## Algorithm Description
 
-    Harmonica extracts important features by a multi-stage learning process. The rough idea is the following (see paper for more details)
+Harmonica extracts important features by a multi-stage learning process. The rough idea is the following (see paper for more details)
 
     Step 1. Uniformly sample (say) 100 configurations
     Step 2. Extend the feature vector with low degree monomials on hyperparameters
@@ -30,12 +30,12 @@ You may comment/uncomment the two examples in samplings.py, and run python main.
     Step 4. Pick the top (say) 5 important monomials, fix them to minimize the sparse linear function that Lasso learned.
     Step 5. Update function f, go back to Step 1.
 
-    Keep running this process for (say) 3 stages, and we already fix lots of important variables. Now we can call some base algorithm like Hyperband, Random search (or your favorite hyperparameter tuning algorithm) for fine tuning the remaining variables.
+Keep running this process for (say) 3 stages, and we already fix lots of important variables. Now we can call some base algorithm like Hyperband, Random search (or your favorite hyperparameter tuning algorithm) for fine tuning the remaining variables.
 
-    As we can see above, there are a few hyperparameters for Harmonica, like #samples, alpha, #important monomials, #stages. Fortunately, we observe that Harmonica is not very sensitive to those hyperparameters. Usually the default value works well.
+As we can see above, there are a few hyperparameters for Harmonica, like #samples, alpha, #important monomials, #stages. Fortunately, we observe that Harmonica is not very sensitive to those hyperparameters. Usually the default value works well.
 
 ## Parallel Tips
-    It is easy to make Harmonica run in parallel during the sampling process. Here is a simple way for doing it in Azure. (EC2 is similar)
+It is easy to make Harmonica run in parallel during the sampling process. Here is a simple way for doing it in Azure. (EC2 is similar)
 
     1. Add a few (say 10) virtual machines in the same resource group.
     2. For every machine, set up the corresponding DNS name. Say, hyper001.eastus.cloudapp.azure.com
@@ -45,26 +45,25 @@ You may comment/uncomment the two examples in samplings.py, and run python main.
        Here hosts.txt is a text file with 10 lines. Each line contains the host name for one machine (say, M3, or M5)
        And by running this command, M1-M10 will run 'ls' locally.
 
-   Now you are able to run programs on 10 machines simultaneously. How should we make sure everyone is working on different tasks?
-   First, create a shared filesystem. See [how to do it on azure](https://docs.microsoft.com/en-us/azure/storage/storage-how-to-use-files-linux)
-   Or you may create your own shared filesystem by directly using [SMB](https://help.ubuntu.com/community/How%20to%20Create%20a%20Network%20Share%20Via%20Samba%20Via%20CLI%20%28Command-line%20interface/Linux%20Terminal%29%20-%20Uncomplicated%2C%20Simple%20and%20Brief%20Way%21)
+Now you are able to run programs on 10 machines simultaneously. How should we make sure everyone is working on different tasks?
+First, create a shared filesystem. See [how to do it on azure](https://docs.microsoft.com/en-us/azure/storage/storage-how-to-use-files-linux)
+Or you may create your own shared filesystem by directly using [SMB](https://help.ubuntu.com/community/How%20to%20Create%20a%20Network%20Share%20Via%20Samba%20Via%20CLI%20%28Command-line%20interface/Linux%20Terminal%29%20-%20Uncomplicated%2C%20Simple%20and%20Brief%20Way%21)
 
-   Once it's done, every machine will have a local directory, say, /shared, which is shared with every other machine.
+Once it's done, every machine will have a local directory, say, /shared, which is shared with every other machine.
 
-   Now, you may first write a "task.txt" file, which contains, say, 100 tasks. Let's call it T1, T2, ..., T100.
-   On every machine, you run the program that reads the task.txt file, and understand there are 100 tasks to do. Then the program does the following.
+Now, you may first write a "task.txt" file, which contains, say, 100 tasks. Let's call it T1, T2, ..., T100.
+On every machine, you run the program that reads the task.txt file, and understand there are 100 tasks to do. Then the program does the following.
 
    Step 1: It randomly picks (without replacement) a task from the 100 tasks, say T35. Assuming the program is running on M7.
    Step 2: It first makes sure that files named "T35M1", "T35M2", ... "T35M10" do not exist in /shared/tags folder. (otherwise someone else is working on it; go back to step 1)
    Step 3: It writes a file called "T35M7" in /shared/tags folder, declaring it's working on this task (therefore other machines will not touch T35)
    Step 4: After finish T35, it writes "T35Finished" in /shared/tags, and goes back to step 1.
 
-   PS1: If one machine stops unexpectedly, you may restart the program again, and clean the corresponding tags. For example, M7 accidentally stops,
-   and it was working on T35. Therefore, T35M7 exists in /shared/tags, but T35Finished does not. So M7 should remove /shared/tags/T35M7,
-   and start working on this task again.
-   PS2: the program will be able to know it's name by accessing /etc/hostname.
-   PS3: It is possible that multiple machines will work on the same task, because there is no lock between Step 2 and Step 3.
-   However, it does not happen very often in practice. If you have much more machines than 10 such that it becomes a problem, you may want to use more fancy tools (like map-reduce).
+PS1: If one machine stops unexpectedly, you may restart the program again, and clean the corresponding tags. For example, M7 accidentally stops,
+and it was working on T35. Therefore, T35M7 exists in /shared/tags, but T35Finished does not. So M7 should remove /shared/tags/T35M7,
+and start working on this task again.
+PS2: the program will be able to know it's name by accessing /etc/hostname.
+PS3: It is possible that multiple machines will work on the same task, because there is no lock between Step 2 and Step 3. However, it does not happen very often in practice. If you have much more machines than 10 such that it becomes a problem, you may want to use more fancy tools (like map-reduce).
 
 
 For any questions, please email Yang: yangyuan@cs.cornell.edu.

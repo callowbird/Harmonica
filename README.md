@@ -18,7 +18,7 @@ Harmonica will run 3 stages by default, and then run a base algorithm for fine t
 
 ## Two Examples
 
-You may comment/uncomment the two examples in samplings.py, and run "python main.py".
+You may comment/uncomment the two examples in [samplings.py](https://github.com/callowbird/Harmonica/blob/master/samplings.py), and run "python main.py".
 
 ## Algorithm Description
 
@@ -34,7 +34,7 @@ Keep running this process for (say) 3 stages, and we already fix lots of importa
 
 As we can see above, there are a few hyperparameters for Harmonica, like #samples, alpha, #important monomials, #stages. Fortunately, we observe that Harmonica is not very sensitive to those hyperparameters. Usually the default value works well.
 
-## Parallel Tips
+## Parallel Tips (Optional)
 It is easy to make Harmonica run in parallel during the sampling process. Here is a simple way for doing it with [pssh](https://linux.die.net/man/1/pssh) in Azure. (EC2 is similar)
 
     1. Add a few (say 10) virtual machines in the same resource group.

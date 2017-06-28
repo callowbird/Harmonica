@@ -10,7 +10,7 @@ Before using the code, you may need to implement three parts by yourself:
 2. (Optional) If you want to use hyperband as the base algorithm (see paper for more details), you also need to implement "batch_intermediate_sampling" method in [samplings.py](https://github.com/callowbird/Harmonica/blob/master/samplings.py) for your own application. For the details of this method, please read the [hyperband paper](https://arxiv.org/abs/1603.06560). If you want to use random search as the base algorithm, please comment/uncomment [the line](https://github.com/callowbird/Harmonica/blob/master/main.py#L101) at the last of [main.py](https://github.com/callowbird/Harmonica/blob/master/main.py).
 3. (Optional) Harmonica only needs uniform sampling in each stage, therefore it makes sense to implement the sampling process in parallel if you have multiple machines. Please modify "batch_sampling" method in [samplings.py](https://github.com/callowbird/Harmonica/blob/master/samplings.py) accordingly. See [Parallelization Tips](https://github.com/callowbird/Harmonica#parallel-tips) for some suggestions.
 
-You also need to fill **options.txt** to give the names of each hyperparameter. See options_example.txt for illustration. Do not add extra lines at the end of the file.
+You also need to fill [options.txt](https://github.com/callowbird/Harmonica/blob/master/options.txt) to give the names of each hyperparameter. See [options_example.txt](https://github.com/callowbird/Harmonica/blob/master/options_example.txt) for illustration. Do not add extra lines at the end of the file.
 
 Now you may run "python main.py -N 60", if you have 60 hyperparameters. Notice that it also indicates that options.txt contains exactly 60 lines.
 

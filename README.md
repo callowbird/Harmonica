@@ -3,7 +3,7 @@ Code repository for the paper [Hyperparameter Optimization: A Spectral Approach]
 
 ## How To Use The Code
 
-(We are using Python 3)
+We are using Python 3. The code currently only supports tuning binary hyperparameters (taking value from {-1,+1})
 
 Before using the code, you may need to implement three parts by yourself:
 1. "query" method in [samplings.py](https://github.com/callowbird/Harmonica/blob/master/samplings.py). This method has input x (a vector of hyperparameters), and output y (the loss value of this vector). See samplings.py for two simple examples.

@@ -8,7 +8,7 @@ import numpy as np
 ##########################################################################
 def query(x):
     assert(len(x)==60)
-    return 10*(x[0]+x[15]+x[46]+x[38]+x[3]*x[6])  #return a simple sparse linear function
+    return 10*(x[2]*x[8]+x[15]+x[46]+x[38]+x[3]*x[6])  #return a simple sparse linear function
 ##########################################################################
 
 

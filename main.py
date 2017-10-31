@@ -9,9 +9,9 @@ from base_alg import base_hyperband,base_random_search
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-alpha', type=float, default=3, help='weight of the l_1 regularization in Lasso')
-parser.add_argument('-nSample', type=int, default=100, help='number of samples per stage?')
+parser.add_argument('-nSample', type=int, default=300, help='number of samples per stage?')
 parser.add_argument('-nStage', type=int, default=3, help='number of stages?')
-parser.add_argument('-degree', type=int, default=3, help='degree of the features?')
+parser.add_argument('-degree', type=int, default=3, help='degree of the features? If -1, will tune it automatically.')
 parser.add_argument('-nMono', type=int, default=5, help='number of monomials selected in Lasso?')
 parser.add_argument('-N', type=int, default=60, help='number of hyperparameters?')
 parser.add_argument('-t', type=int, default=1, help='number of masks picked in each stage?')
@@ -26,11 +26,7 @@ print("Total options : ",len(optionNames))
 assert(len(optionNames)==opt.N)     # Please be consistent on the number of options names and the number of options.
 extendedNames=[]                    # This list stores the names of the features, including vanilla features and low degree features
 featureIDList=[]                    # This list stores the variable IDs of each feature
-for depth in range(0, opt.degree+1):
-    addNames('', 0, depth, 0, [], optionNames, extendedNames, featureIDList,opt.N)    # This method computes extendedNames and featureIDList
-print("Number of features : ",len(extendedNames))
 
-featureExtender = PolynomialFeatures(opt.degree, interaction_only=True)   # This function generates low degree monomials. It's a little bit slow though. You may write your own function using recursion.
 LassoSolver = linear_model.Lasso(fit_intercept=True, alpha=opt.alpha)     # Lasso solver
 
 def getBasisValue(input,basis,featureIDList): # Return the value of a basis
@@ -41,6 +37,8 @@ def getBasisValue(input,basis,featureIDList): # Return the value of a basis
             term=term*input[entry]
         ans+=term
     return ans
+
+selected_degree=opt.degree
 
 for currentStage in range(opt.nStage):                      # Multi-stage Lasso
     printSeparator()
@@ -53,11 +51,45 @@ for currentStage in range(opt.nStage):                      # Multi-stage Lasso
         for basis in learnedFeature:
             y[i]-=getBasisValue(x[i],basis,featureIDList)     # Remove the linear component previously learned
 
-    print("Extending feature vectors..")
-    tmp=[]
-    for current_x in x:
-        tmp.append(featureExtender.fit_transform(np.array(current_x).reshape(1, -1))[0].tolist())   # Extend feature vectors with monomials
-    x=np.array(tmp)                             # Make it array
+    def get_features(x,degree):
+        print("Extending feature vectors with degree "+str(degree)+" ..")
+        featureExtender = PolynomialFeatures(degree, interaction_only=True)   # This function generates low degree monomials. It's a little bit slow though. You may write your own function using recursion.
+        tmp=[]
+        for current_x in x:
+            tmp.append(featureExtender.fit_transform(np.array(current_x).reshape(1, -1))[0].tolist())   # Extend feature vectors with monomials
+        return tmp
+
+    if selected_degree<0:  #tune automatically
+        last_ind=-1
+        print("Searching for the best degree parameter..")
+        selected_degree=2
+        while True:
+            tmp=get_features(x,selected_degree)
+            tmp=np.array(tmp)                         # Make it array
+            LassoSolver.fit(tmp, y)                       # Run Lasso to detect important features
+            coef=LassoSolver.coef_
+            index=np.argsort(-np.abs(coef))             # Sort the coefficient, find the top ones
+            index=index[:opt.nMono]                      # select the top indices
+            print("get the following indicse",index)
+            find_useful=False
+            for i in index:
+                if i>last_ind:
+                    find_useful=True
+                    break
+            if find_useful:
+                last_ind=len(coef)
+                print("new len",last_ind)
+                selected_degree+=1
+            else:
+                print("done with degree ",selected_degree)
+                selected_degree-=1
+                break
+    if (currentStage==0):
+        for depth in range(0, selected_degree+1):
+            addNames('', 0, depth, 0, [], optionNames, extendedNames, featureIDList,opt.N)    # This method computes extendedNames and featureIDList
+        print("Number of features : ",len(extendedNames))
+
+    x=np.array(get_features(x,selected_degree))                     # Make it array
 
     print("Running linear regression..")
     LassoSolver.fit(x, y)                       # Run Lasso to detect important features

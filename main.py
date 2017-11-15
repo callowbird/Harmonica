@@ -105,15 +105,15 @@ for currentStage in range(opt.nStage):                      # Multi-stage Lasso
     print("")
     learnedFeature.append(cur_basis[:])                      # Save these features in learned features
 
-    mapped_count = np.zeros(opt.nSample)                     # Initialize the count matrix
+    mapped_count = np.zeros(opt.N)                     # Initialize the count matrix
 
     for cur_monomial in cur_basis:                          # For every important feature (a monomial) that we learned
         for cur_index in featureIDList[cur_monomial[1]]:                   # For every variable in the monomial
             mapped_count[cur_index]+=1                      # We update its count
 
-    config_enumerate = np.zeros(opt.nSample)                # Use this array to enumerate all possible configuration (to find the minimum for the current sparse polynomial)
+    config_enumerate = np.zeros(opt.N)                # Use this array to enumerate all possible configuration (to find the minimum for the current sparse polynomial)
     l=[]                                                    # All relevant variables.
-    for i in range(0, opt.nSample):                         # We only need to enumerate the value for those relevant variables
+    for i in range(0, opt.N):                         # We only need to enumerate the value for those relevant variables
         if mapped_count[i] > 0:                             # This part can be made slightly faster. If count=1, we can always set the best value for this variable.
             l.append(i)
 
